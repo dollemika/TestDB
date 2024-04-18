@@ -7,12 +7,6 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
-        // example0();
-        //example1();
-        //example2();
-        // exampleInsert1();
-        // exampleInsert2();
-        //exampleUpdate1();
         task();
     }
 
@@ -33,85 +27,7 @@ public class Main {
 
         conn.close();
     }
-
-    private static void exampleUpdate1() throws SQLException {
-        Connection conn = connectToDB();
-        //выводим список пользователей
-        ArrayList<User> users = loadUsers(conn);
-        System.out.println("получен список из " + users.size() + " юзеров");
-        users.forEach(System.out::println);
-        //предоставляем возможность выбрать пользователя из списка
-        User selectedUser = selectUser(users);
-        //просим ввести новую ФИО
-        changeFIO(selectedUser);
-        //сохраняем изменение в БД
-        updateUserInDB(selectedUser, conn);
-        //выводим список пользователей
-        System.out.println("Теперь список из " + users.size() + " юзеров");
-        users.forEach(System.out::println);
-        conn.close();
-    }
-
-
-    private static Message delMsgFind(ArrayList<Message> m) {
-        if (m != null) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("введите id сообщения к удалению");
-            int m_id = scanner.nextInt();
-            Message mForDel=null;
-            for (Message x: m){
-                if (x.id == m_id) mForDel = x;
-            }
-            return mForDel;
-        }
-        else return null;
-    }
-    private static void changeFIO(User selectedUser) {
-        if (selectedUser != null) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("введите новую ФИО");
-            String newFIO = scanner.nextLine();
-            selectedUser.setFio(newFIO);
-        }
-    }
-
-    private static User selectUser(ArrayList<User> users) {
-        System.out.println("выберете пользователя для редактирования");
-        System.out.println("введите id");
-        Scanner scanner = new Scanner(System.in);
-        int id = scanner.nextInt();
-        //User selected = null;
-        for (User u : users) {
-            if (u.id == id)
-                return u;
-        }
-        System.out.println("такого id нет в списке");
-        return null;
-    }
-
-    private static void exampleInsert2() throws SQLException {
-        Connection conn = connectToDB();
-        //запросим пользователя в консоли ввести Фамилию и деньги
-        User user = inputFromConsole();
-        //получим пользователя, сохраним его в таблице
-        saveUserToDB(user, conn);
-        //выведем список всех пользователей из таблицы
-        ArrayList<User> users = loadUsers(conn);
-        System.out.println("получен список из " + users.size() + " юзеров");
-        users.forEach(System.out::println);
-
-        conn.close();
-    }
-
-    public static User inputFromConsole() {
-        int id = -1;
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("введите ФИО и деньги");
-        String name = scanner.next();
-        double m = scanner.nextDouble();
-        User user = new User(id, name, m);
-        return user;
-    }
+//-------------------------------------------------------------------------------------------------
     public static Message inputMsgFromConsole(ArrayList<User> users) {
         int id = -1;
         Scanner scanner = new Scanner(System.in);
@@ -128,76 +44,6 @@ public class Main {
         if (sender != null && target != null) m = new Message(id, text, sender, target);
         return m;
     }
-
-    private static void example2() throws SQLException {
-        Connection conn = connectToDB();
-        ArrayList<User> users = loadUsers(conn);
-        System.out.println("получен список из " + users.size() + " юзеров");
-        users.forEach(System.out::println);
-
-        conn.close();
-    }
-
-
-
-    private static void example1() throws SQLException {
-        Connection conn = connectToDB();
-        Statement st = conn.createStatement();
-        ResultSet rs = st.executeQuery("SELECT * FROM public.user");
-        while (rs.next()) {
-            int x = rs.getInt("id");
-            String fio = rs.getString("fio");
-            double m = rs.getDouble("money");
-            System.out.println("получена строка: " + x + " " + fio + " " + m);
-        }
-        rs.close();
-        st.close();
-        conn.close();
-    }
-
-    public static void example0() {
-        String url = "jdbc:postgresql://10.10.104.136:5432/test4";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "123");
-        props.setProperty("ssl", "false");
-        try {
-            Connection conn = DriverManager.getConnection(url, props);
-            System.out.println("удалось подключиться к БД test4");
-            conn.close();
-        } catch (SQLException e) {
-            System.out.println("все пропало");
-            e.printStackTrace();
-        }
-    }
-
-    public static void exampleInsert1() throws SQLException {
-        Connection conn = connectToDB();
-        User user = new User(-1, "Пупкин", 123456);
-        saveUserToDB(user, conn);
-        ArrayList<User> users = loadUsers(conn);
-        System.out.println("получен список из " + users.size() + " юзеров");
-        users.forEach(System.out::println);
-        conn.close();
-    }
-
-    public static Connection connectToDB() {
-        String url = "jdbc:postgresql://10.10.104.136:5432/test4";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "123");
-        props.setProperty("ssl", "false");
-        try {
-            Connection conn = DriverManager.getConnection(url, props);
-            return conn;
-        } catch (SQLException e) {
-            System.out.println("все пропало");
-            e.printStackTrace();
-            return null;
-        }
-    }
-    //следующие методы относятся по смыслу к DAO (обеспечивают связь модели и БД)
-
     public static ArrayList<Message> loadMessage(Connection conn, ArrayList<User> users) throws SQLException {
         ArrayList<Message> msg = new ArrayList<>();
         Statement st = conn.createStatement();
@@ -230,23 +76,152 @@ public class Main {
         System.out.println(countInserted + " строк добавлено");
         st.close();
     }
+    private static Message delMsgFind(ArrayList<Message> m) {
+        if (m != null) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("введите id сообщения к удалению");
+            int m_id = scanner.nextInt();
+            Message mForDel=null;
+            for (Message x: m){
+                if (x.id == m_id) mForDel = x;
+            }
+            return mForDel;
+        }
+        else return null;
+    }
     public static void delMsgFromDB(Message m, Connection conn) throws SQLException {
         PreparedStatement st = conn.prepareStatement("DELETE FROM public.\"message\" WHERE \"id\" = ?");
         st.setInt(1, m.id);
         int rowsDeleted = st.executeUpdate();
         st.close();
-//        PreparedStatement st = conn.prepareStatement("INSERT INTO public.\"message\"\n" +
-//                "(\"text\", \"sender_id\", \"target_id\")\n" +
-//                "VALUES(?, ?,?);");
-//        st.setString(1, m.text);
-//        st.setInt(2, m.sender.id);
-//        st.setInt(3, m.target.id);
-//        int countInserted = st.executeUpdate();
-//        System.out.println(countInserted + " строк добавлено");
-//        st.close();
+    }
+//-------------------------------------------------------------------------------------------------
+
+
+
+    private static void exampleUpdate1() throws SQLException {
+        Connection conn = connectToDB();
+        //выводим список пользователей
+        ArrayList<User> users = loadUsers(conn);
+        System.out.println("получен список из " + users.size() + " юзеров");
+        users.forEach(System.out::println);
+        //предоставляем возможность выбрать пользователя из списка
+        User selectedUser = selectUser(users);
+        //просим ввести новую ФИО
+        changeFIO(selectedUser);
+        //сохраняем изменение в БД
+        updateUserInDB(selectedUser, conn);
+        //выводим список пользователей
+        System.out.println("Теперь список из " + users.size() + " юзеров");
+        users.forEach(System.out::println);
+        conn.close();
+    }
+    private static void changeFIO(User selectedUser) {
+        if (selectedUser != null) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("введите новую ФИО");
+            String newFIO = scanner.nextLine();
+            selectedUser.setFio(newFIO);
+        }
+    }
+    private static User selectUser(ArrayList<User> users) {
+        System.out.println("выберете пользователя для редактирования");
+        System.out.println("введите id");
+        Scanner scanner = new Scanner(System.in);
+        int id = scanner.nextInt();
+        //User selected = null;
+        for (User u : users) {
+            if (u.id == id)
+                return u;
+        }
+        System.out.println("такого id нет в списке");
+        return null;
+    }
+    private static void exampleInsert2() throws SQLException {
+        Connection conn = connectToDB();
+        //запросим пользователя в консоли ввести Фамилию и деньги
+        User user = inputFromConsole();
+        //получим пользователя, сохраним его в таблице
+        saveUserToDB(user, conn);
+        //выведем список всех пользователей из таблицы
+        ArrayList<User> users = loadUsers(conn);
+        System.out.println("получен список из " + users.size() + " юзеров");
+        users.forEach(System.out::println);
+
+        conn.close();
+    }
+    public static User inputFromConsole() {
+        int id = -1;
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("введите ФИО и деньги");
+        String name = scanner.next();
+        double m = scanner.nextDouble();
+        User user = new User(id, name, m);
+        return user;
+    }
+    private static void example2() throws SQLException {
+        Connection conn = connectToDB();
+        ArrayList<User> users = loadUsers(conn);
+        System.out.println("получен список из " + users.size() + " юзеров");
+        users.forEach(System.out::println);
+
+        conn.close();
+    }
+    private static void example1() throws SQLException {
+        Connection conn = connectToDB();
+        Statement st = conn.createStatement();
+        ResultSet rs = st.executeQuery("SELECT * FROM public.user");
+        while (rs.next()) {
+            int x = rs.getInt("id");
+            String fio = rs.getString("fio");
+            double m = rs.getDouble("money");
+            System.out.println("получена строка: " + x + " " + fio + " " + m);
+        }
+        rs.close();
+        st.close();
+        conn.close();
+    }
+    public static void example0() {
+        String url = "jdbc:postgresql://10.10.104.136:5432/test4";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "123");
+        props.setProperty("ssl", "false");
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            System.out.println("удалось подключиться к БД test4");
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("все пропало");
+            e.printStackTrace();
+        }
+    }
+    public static void exampleInsert1() throws SQLException {
+        Connection conn = connectToDB();
+        User user = new User(-1, "Пупкин", 123456);
+        saveUserToDB(user, conn);
+        ArrayList<User> users = loadUsers(conn);
+        System.out.println("получен список из " + users.size() + " юзеров");
+        users.forEach(System.out::println);
+        conn.close();
+    }
+    public static Connection connectToDB() {
+        String url = "jdbc:postgresql://10.10.104.136:5432/test4";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "123");
+        props.setProperty("ssl", "false");
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            return conn;
+        } catch (SQLException e) {
+            System.out.println("все пропало");
+            e.printStackTrace();
+            return null;
+        }
     }
 
-
+    //следующие методы относятся по смыслу к DAO (обеспечивают связь модели и БД)
     public static ArrayList<User> loadUsers(Connection conn) throws SQLException {
         ArrayList<User> users = new ArrayList<>();
         Statement st = conn.createStatement();
@@ -262,7 +237,6 @@ public class Main {
         st.close();
         return users;
     }
-
     public static void saveUserToDB(User user, Connection conn) throws SQLException {
         PreparedStatement st = conn.prepareStatement("INSERT INTO public.\"user\"\n" +
                 "(fio, \"money\")\n" +
@@ -273,7 +247,6 @@ public class Main {
         System.out.println(countInserted + " строк добавлено");
         st.close();
     }
-
     public static void updateUserInDB(User user, Connection conn) throws SQLException {
         if (user != null && conn !=null) {
             PreparedStatement st = conn.prepareStatement("UPDATE public.\"user\"\n" +
