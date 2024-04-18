@@ -5,6 +5,11 @@ import java.util.Objects;
 public class User {
     int id;
     String fio;
+
+    public void setFio(String fio) {
+        this.fio = fio;
+    }
+
     double money;
 
     public User(int id, String fio, double money) {
