@@ -20,7 +20,18 @@ public class Main {
         Connection conn = connectToDB();
         ArrayList<User> users = loadUsers(conn);
         ArrayList<Message> msg = loadMessage(conn,users);
+
+        Message m = inputMsgFromConsole(users);
+        saveMsgToDB(m,conn);
+        msg = loadMessage(conn,users);
         msg.forEach(System.out::println);
+
+        m = delMsgFind(msg);
+        delMsgFromDB(m, conn);
+        msg = loadMessage(conn,users);
+        msg.forEach(System.out::println);
+
+        conn.close();
     }
 
     private static void exampleUpdate1() throws SQLException {
@@ -42,7 +53,19 @@ public class Main {
     }
 
 
-
+    private static Message delMsgFind(ArrayList<Message> m) {
+        if (m != null) {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("введите id сообщения к удалению");
+            int m_id = scanner.nextInt();
+            Message mForDel=null;
+            for (Message x: m){
+                if (x.id == m_id) mForDel = x;
+            }
+            return mForDel;
+        }
+        else return null;
+    }
     private static void changeFIO(User selectedUser) {
         if (selectedUser != null) {
             Scanner scanner = new Scanner(System.in);
@@ -88,6 +111,22 @@ public class Main {
         double m = scanner.nextDouble();
         User user = new User(id, name, m);
         return user;
+    }
+    public static Message inputMsgFromConsole(ArrayList<User> users) {
+        int id = -1;
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("введите от кого, кому, и сообщение");
+        int sender_id = scanner.nextInt();
+        int target_id = scanner.nextInt();
+        String text = scanner.next();
+        User sender=null,target=null;
+        Message m = null;
+        for (User u: users){
+            if (u.id == sender_id) sender = u;
+            if (u.id == target_id) target = u;
+        }
+        if (sender != null && target != null) m = new Message(id, text, sender, target);
+        return m;
     }
 
     private static void example2() throws SQLException {
@@ -179,6 +218,32 @@ public class Main {
         rs.close();
         st.close();
         return msg;
+    }
+    public static void saveMsgToDB(Message m, Connection conn) throws SQLException {
+        PreparedStatement st = conn.prepareStatement("INSERT INTO public.\"message\"\n" +
+                "(\"text\", \"sender_id\", \"target_id\")\n" +
+                "VALUES(?, ?,?);");
+        st.setString(1, m.text);
+        st.setInt(2, m.sender.id);
+        st.setInt(3, m.target.id);
+        int countInserted = st.executeUpdate();
+        System.out.println(countInserted + " строк добавлено");
+        st.close();
+    }
+    public static void delMsgFromDB(Message m, Connection conn) throws SQLException {
+        PreparedStatement st = conn.prepareStatement("DELETE FROM public.\"message\" WHERE \"id\" = ?");
+        st.setInt(1, m.id);
+        int rowsDeleted = st.executeUpdate();
+        st.close();
+//        PreparedStatement st = conn.prepareStatement("INSERT INTO public.\"message\"\n" +
+//                "(\"text\", \"sender_id\", \"target_id\")\n" +
+//                "VALUES(?, ?,?);");
+//        st.setString(1, m.text);
+//        st.setInt(2, m.sender.id);
+//        st.setInt(3, m.target.id);
+//        int countInserted = st.executeUpdate();
+//        System.out.println(countInserted + " строк добавлено");
+//        st.close();
     }
 
 
